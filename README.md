@@ -8,7 +8,10 @@ Example usage:
 ```c++
 void loadImages()
 {
-  loader.loadTextureAsync("textures/image.jpg", [this] (ofTexture* tex) {
+  loader.loadTextureAsync("textures/image.jpg", [this] (shared_ptr<ofTexture> tex) {
+	  if (tex == NULL) {
+		ofLogError() << "error loading image.jpg";
+	  }
 	  myImage = tex;
   });
 }
