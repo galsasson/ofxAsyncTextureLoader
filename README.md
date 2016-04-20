@@ -19,7 +19,9 @@ void loadImages()
 void draw()
 {
   if (myImage) {
-    myImage->draw();
+    myImage->draw(0, 0);
   }
 }
 ```
+
+This addon relies on GLFW for the second openGL context creation and works only on platforms that use it (Windows, OS X, Linux, Android).
