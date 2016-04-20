@@ -9,6 +9,7 @@ Example usage:
 void loadImages()
 {
   loader.loadTextureAsync("textures/image.jpg", [this] (shared_ptr<ofTexture> tex) {
+	  // load complete callback
 	  if (tex == NULL) {
 		ofLogError() << "error loading image.jpg";
 	  }
