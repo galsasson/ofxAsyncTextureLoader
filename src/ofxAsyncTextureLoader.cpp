@@ -11,7 +11,7 @@
 ofxAsyncTextureLoader::~ofxAsyncTextureLoader()
 {
 	bRunning = false;
-	textureLoaderThread.detach();
+	textureLoaderThread.join();
 }
 
 ofxAsyncTextureLoader::ofxAsyncTextureLoader()
@@ -89,6 +89,7 @@ void ofxAsyncTextureLoader::loaderThreadFunction()
 
 		for (TextureLoaderTask& task : tasks) {
 			task.tex = loadTextureSync(task.path, task.bMipmapped);
+			glFinish();
 			if (task.tex == NULL) {
 				ofLogError("BackgroundTextureLoader") << "error loading texture: " << task.path;
 			}
