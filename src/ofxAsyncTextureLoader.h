@@ -15,9 +15,7 @@ class ofxAsyncTextureLoader
 public:
 	~ofxAsyncTextureLoader();
 	ofxAsyncTextureLoader();
-	// load texture async (returns a unique request id)
 	void loadTextureAsync(const string& path, const function<void(shared_ptr<ofTexture>)>& completeCallback = [](shared_ptr<ofTexture> tex) {}, bool mipmapped=false);
-	// load texture sync
 	shared_ptr<ofTexture> loadTextureSync(const string& path, bool mipmapped=false);
 
 	void callCompleteCallbacks(ofEventArgs& updateArgs);

@@ -19,10 +19,10 @@ ofxAsyncTextureLoader::ofxAsyncTextureLoader()
 	GLFWwindow* mainWindow = getMainContextWindow();
 	bool ok = create2ndContext(mainWindow);
 	if (!ok) {
-		ofLogError("ofxAsyncTextureLoader") << "error creating 2nd openGL context";
+		ofLogError("ofxAsyncTextureLoader") << "error creating second openGL context";
 		return;
 	}
-	ofLogNotice("ofxAsyncTextureLoader") << "2nd openGL context created successfully";
+	ofLogNotice("ofxAsyncTextureLoader") << "second openGL context created successfully";
 	ofAddListener(ofEvents().update, this, &ofxAsyncTextureLoader::callCompleteCallbacks);
 	textureLoaderThread = std::thread(&ofxAsyncTextureLoader::loaderThreadFunction, this);
 	bRunning = true;
@@ -91,7 +91,7 @@ void ofxAsyncTextureLoader::loaderThreadFunction()
 			task.tex = loadTextureSync(task.path, task.bMipmapped);
 			glFinish();
 			if (task.tex == NULL) {
-				ofLogError("BackgroundTextureLoader") << "error loading texture: " << task.path;
+				ofLogError("ofxAsyncTextureLoader") << "error loading texture: " << task.path;
 			}
 			completeQueueMutex.lock();
 			completeQueue.push_back(task);
