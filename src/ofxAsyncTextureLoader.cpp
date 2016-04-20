@@ -23,7 +23,7 @@ ofxAsyncTextureLoader::ofxAsyncTextureLoader()
 		return;
 	}
 	ofLogNotice("ofxAsyncTextureLoader") << "second openGL context created successfully";
-	ofAddListener(ofEvents().update, this, &ofxAsyncTextureLoader::callCompleteCallbacks);
+	ofAddListener(ofEvents().update, this, &ofxAsyncTextureLoader::update);
 	textureLoaderThread = std::thread(&ofxAsyncTextureLoader::loaderThreadFunction, this);
 	bRunning = true;
 }
@@ -102,7 +102,7 @@ void ofxAsyncTextureLoader::loaderThreadFunction()
 	}
 }
 
-void ofxAsyncTextureLoader::callCompleteCallbacks(ofEventArgs& updateArgs)
+void ofxAsyncTextureLoader::callCompleteCallbacks()
 {
 	completeQueueMutex.lock();
 	vector<struct TextureLoaderTask> loaded = completeQueue;
@@ -112,4 +112,9 @@ void ofxAsyncTextureLoader::callCompleteCallbacks(ofEventArgs& updateArgs)
 	for (TextureLoaderTask& task : loaded) {
 		task.loadCompleteCallback(task.tex);
 	}
+}
+
+void ofxAsyncTextureLoader::update(ofEventArgs& updateArgs)
+{
+	callCompleteCallbacks();
 }

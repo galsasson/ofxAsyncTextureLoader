@@ -18,7 +18,7 @@ public:
 	void loadTextureAsync(const string& path, const function<void(shared_ptr<ofTexture>)>& completeCallback = [](shared_ptr<ofTexture> tex) {}, bool mipmapped=false);
 	shared_ptr<ofTexture> loadTextureSync(const string& path, bool mipmapped=false);
 
-	void callCompleteCallbacks(ofEventArgs& updateArgs);
+	void callCompleteCallbacks();
 
 private:
 	bool bRunning;
@@ -38,4 +38,5 @@ private:
 	GLFWwindow* getMainContextWindow();
 	bool create2ndContext(GLFWwindow* main);
 	void loaderThreadFunction();
+	void update(ofEventArgs& updateArgs);
 };
