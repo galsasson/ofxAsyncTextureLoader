@@ -43,18 +43,11 @@ void ofxAsyncTextureLoader::loadTextureAsync(const string &path, const function<
 shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path, bool mipmapped)
 {
 	shared_ptr<ofTexture> tex(make_shared<ofTexture>());
-	bool ok = ofLoadImage(*tex, path);
-	if (ok) {
-		if (mipmapped) {
-			tex->bind();
-			glGenerateMipmap(tex->getTextureData().textureTarget);
-			tex->unbind();
-			tex->setTextureMinMagFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-		}
-
-		tex->setTextureWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	if (mipmapped) {
+		tex->enableMipmap();
 	}
-	else {
+	bool ok = ofLoadImage(*tex, path);
+	if (!ok) {
 		return NULL;
 	}
 
