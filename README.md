@@ -5,6 +5,13 @@ This addon loads textures **completely** asynchronously using a second openGL co
 
 Example usage:
 
+.h:
+```c++
+ofxAsyncTextureLoader loader;
+shared_ptr<ofTexture> myImage;
+```
+
+.cpp:
 ```c++
 void loadImages()
 {
@@ -24,5 +31,7 @@ void draw()
   }
 }
 ```
+
+The complete callback will be called by the main thread in OF update stage, so no locking is required.
 
 This addon relies on GLFW for the second openGL context creation and works only on platforms that use it (Windows, OS X, Linux, Android).
