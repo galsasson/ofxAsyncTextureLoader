@@ -1,9 +1,9 @@
 # ofxAsyncTextureLoader
 openFrameworks addon that loads textures asynchronously without reducing the application framerate.
 
-This addon loads textures **completely** asynchronously using a second openGL context that shares resources with the main openGL context. This is in contrast to ofxThreadedImageLoader that uses the main openGL context to upload the texture to the GPU which blocks the main thread (especially when loading large textures).
+This addon loads textures **completely** asynchronously using a second OpenGL context that shares resources with the main OpenGL context. This is in contrast to ofxThreadedImageLoader that uses the main openGL context to upload the texture to the GPU which blocks the main thread (especially when loading large textures).
 
-Example usage:
+### Example usage:
 
 .h:
 ```c++
@@ -34,4 +34,4 @@ void draw()
 
 The complete callback will be called by the main thread in OF update stage, so no locking is required.
 
-This addon relies on GLFW for the second openGL context creation and works only on platforms that use it (Windows, OS X, Linux, Android).
+This addon relies on GLFW for the second OpenGL context creation and works only on platforms that use it (Windows, OS X, Linux, Android).

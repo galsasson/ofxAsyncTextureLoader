@@ -19,10 +19,10 @@ ofxAsyncTextureLoader::ofxAsyncTextureLoader()
 	GLFWwindow* mainWindow = getMainContextWindow();
 	bool ok = create2ndContext(mainWindow);
 	if (!ok) {
-		ofLogError("ofxAsyncTextureLoader") << "error creating second openGL context";
+		ofLogError("ofxAsyncTextureLoader") << "error creating second OpenGL context";
 		return;
 	}
-	ofLogNotice("ofxAsyncTextureLoader") << "second openGL context created successfully";
+	ofLogNotice("ofxAsyncTextureLoader") << "second OpenGL context created successfully";
 	ofAddListener(ofEvents().update, this, &ofxAsyncTextureLoader::update);
 	textureLoaderThread = std::thread(&ofxAsyncTextureLoader::loaderThreadFunction, this);
 	bRunning = true;
@@ -64,7 +64,8 @@ GLFWwindow* ofxAsyncTextureLoader::getMainContextWindow()
 bool ofxAsyncTextureLoader::create2ndContext(GLFWwindow* main)
 {
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
-	context = glfwCreateWindow(10, 10, "", NULL, main);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	context = glfwCreateWindow(1, 1, "", NULL, main);
 	if (context == NULL) {
 		return false;
 	}
