@@ -16,6 +16,8 @@ class ofxAsyncTexture
 public:
 	void load(const string& path, bool mipmapped=false);
 	bool isLoaded() const { return tex!=NULL; }
+
+	// register to get load complete events
 	ofEvent<ofxAsyncTexture> eventLoaded;
 
 	// providing a partial ofTexture API

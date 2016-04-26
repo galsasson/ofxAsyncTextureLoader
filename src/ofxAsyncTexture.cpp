@@ -108,7 +108,7 @@ void ofxAsyncTexture::drawSubsection(float x, float y, float z, float w, float h
 	if (!isLoaded()) {
 		return;
 	}
-	tex->drawSubsection(x, y, w, h, sx, sy, sw, sh);
+	tex->drawSubsection(x, y, z, w, h, sx, sy, sw, sh);
 }
 
 void ofxAsyncTexture::bind(int textureLocation) const
@@ -126,4 +126,3 @@ void ofxAsyncTexture::unbind(int textureLocation) const
 	}
 	tex->unbind(textureLocation);
 }
-
