@@ -11,25 +11,47 @@
 ofxAsyncTextureLoader::~ofxAsyncTextureLoader()
 {
 	bRunning = false;
-	textureLoaderThread.join();
+	if (textureLoaderThread.joinable()) {
+		textureLoaderThread.join();
+	}
 }
 
 ofxAsyncTextureLoader::ofxAsyncTextureLoader()
 {
+	bInitialized = false;
+	bRunning = false;
+}
+
+bool ofxAsyncTextureLoader::setup()
+{
+	if (bInitialized) {
+		ofLogWarning("ofxAsyncTextureLoader") << "already initialized";
+		return false;
+	}
+
 	GLFWwindow* mainWindow = getMainContextWindow();
+	if (mainWindow == NULL) {
+		ofLogError("ofxAsyncTextureLoader") << "error creating second OpenGL context";
+		return false;
+	}
 	bool ok = create2ndContext(mainWindow);
 	if (!ok) {
 		ofLogError("ofxAsyncTextureLoader") << "error creating second OpenGL context";
-		return;
+		return false;
 	}
 	ofLogNotice("ofxAsyncTextureLoader") << "second OpenGL context created successfully";
+	bInitialized = true;
+	bRunning = true;
 	ofAddListener(ofEvents().update, this, &ofxAsyncTextureLoader::update);
 	textureLoaderThread = std::thread(&ofxAsyncTextureLoader::loaderThreadFunction, this);
-	bRunning = true;
+	return true;
 }
 
 void ofxAsyncTextureLoader::loadTextureAsync(const string &path, const function<void(shared_ptr<ofTexture>)>& completeCallback, bool mipmapped)
 {
+	if (!bInitialized) {
+		ofLogError("ofxAsyncTextureLoader") << "not initialized, call setup() first";
+	}
 	TextureLoaderTask task;
 	task.path = path;
 	task.bMipmapped = mipmapped;
@@ -57,7 +79,13 @@ shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path,
 GLFWwindow* ofxAsyncTextureLoader::getMainContextWindow()
 {
 	ofAppBaseWindow* win = ofGetWindowPtr();
+	if (win == NULL) {
+		return NULL;
+	}
 	ofAppGLFWWindow* glfwWin = dynamic_cast<ofAppGLFWWindow*>(win);
+	if (glfwWin == NULL) {
+		return NULL;
+	}
 	return glfwWin->getGLFWWindow();
 }
 

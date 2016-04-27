@@ -15,12 +15,14 @@ class ofxAsyncTextureLoader
 public:
 	~ofxAsyncTextureLoader();
 	ofxAsyncTextureLoader();
+	bool setup();
 	void loadTextureAsync(const string& path, const function<void(shared_ptr<ofTexture>)>& completeCallback = [](shared_ptr<ofTexture> tex) {}, bool mipmapped=false);
 	shared_ptr<ofTexture> loadTextureSync(const string& path, bool mipmapped=false);
 
 	void callCompleteCallbacks();
 
 private:
+	bool bInitialized;
 	bool bRunning;
 	GLFWwindow* context;
 	std::thread textureLoaderThread;

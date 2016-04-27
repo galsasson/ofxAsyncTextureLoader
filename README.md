@@ -13,14 +13,18 @@ shared_ptr<ofTexture> myImage;
 
 .cpp:
 ```c++
-void loadImages()
+void setup()
 {
+  // must be called first
+  loader.setup();
+
+  // load a texture
   loader.loadTextureAsync("textures/image.jpg", [this] (shared_ptr<ofTexture> tex) {
-	  // load complete callback
-	  if (tex == NULL) {
-		ofLogError() << "error loading image.jpg";
-	  }
-	  myImage = tex;
+    // load complete callback
+    if (tex == NULL) {
+      ofLogError() << "error loading image.jpg";
+    }
+    myImage = tex;
   });
 }
 

@@ -43,8 +43,12 @@ private:
 	string texturePath;
 	shared_ptr<ofTexture> tex;
 	static ofxAsyncTextureLoader& getTexLoader() {
-		static ofxAsyncTextureLoader texLoader;
-		return texLoader;
+		static ofxAsyncTextureLoader* texLoader = NULL;
+		if (texLoader == NULL) {
+			texLoader = new ofxAsyncTextureLoader();
+			texLoader->setup();
+		}
+		return *texLoader;
 	}
 };
 
