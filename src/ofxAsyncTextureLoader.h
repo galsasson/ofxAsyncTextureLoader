@@ -38,7 +38,7 @@ private:
 	std::mutex completeQueueMutex;
 
 	GLFWwindow* getMainContextWindow();
-	bool create2ndContext(GLFWwindow* main);
+	GLFWwindow* create2ndContext(GLFWwindow* main);
 	void loaderThreadFunction();
 	void update(ofEventArgs& updateArgs);
 };

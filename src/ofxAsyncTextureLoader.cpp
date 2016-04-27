@@ -20,6 +20,7 @@ ofxAsyncTextureLoader::ofxAsyncTextureLoader()
 {
 	bInitialized = false;
 	bRunning = false;
+	context = NULL;
 }
 
 bool ofxAsyncTextureLoader::setup()
@@ -34,8 +35,8 @@ bool ofxAsyncTextureLoader::setup()
 		ofLogError("ofxAsyncTextureLoader") << "error creating second OpenGL context";
 		return false;
 	}
-	bool ok = create2ndContext(mainWindow);
-	if (!ok) {
+	context = create2ndContext(mainWindow);
+	if (context == NULL) {
 		ofLogError("ofxAsyncTextureLoader") << "error creating second OpenGL context";
 		return false;
 	}
@@ -89,15 +90,11 @@ GLFWwindow* ofxAsyncTextureLoader::getMainContextWindow()
 	return glfwWin->getGLFWWindow();
 }
 
-bool ofxAsyncTextureLoader::create2ndContext(GLFWwindow* main)
+GLFWwindow* ofxAsyncTextureLoader::create2ndContext(GLFWwindow* main)
 {
 	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-	context = glfwCreateWindow(1, 1, "", NULL, main);
-	if (context == NULL) {
-		return false;
-	}
-	return true;
+	return glfwCreateWindow(1, 1, "", NULL, main);
 }
 
 void ofxAsyncTextureLoader::loaderThreadFunction()
