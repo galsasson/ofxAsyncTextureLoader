@@ -48,7 +48,7 @@ bool ofxAsyncTextureLoader::setup()
 	return true;
 }
 
-void ofxAsyncTextureLoader::loadTextureAsync(const string &path, const function<void(shared_ptr<ofTexture>)>& completeCallback, bool mipmapped)
+void ofxAsyncTextureLoader::loadTextureAsync(const string& path, bool mipmapped, bool arb, bool loadPixels, ofTexCompression compression, const function<void(shared_ptr<ofTexture>, shared_ptr<ofPixels>)>& completeCallback)
 {
 	if (!bInitialized) {
 		ofLogError("ofxAsyncTextureLoader") << "not initialized, call setup() first";
@@ -56,16 +56,21 @@ void ofxAsyncTextureLoader::loadTextureAsync(const string &path, const function<
 	TextureLoaderTask task;
 	task.path = path;
 	task.bMipmapped = mipmapped;
+	task.bLoadAsARB = arb;
+	task.bLoadPixels = loadPixels;
+	task.compression = compression;
 	task.tex = NULL;
+	task.pixels = NULL;
 	task.loadCompleteCallback = completeCallback;
 	loadQueueMutex.lock();
 	loadQueue.push_back(task);
 	loadQueueMutex.unlock();
 }
 
-shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path, bool mipmapped)
+shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path, bool mipmapped, bool arb, ofTexCompression compression)
 {
 	shared_ptr<ofTexture> tex(make_shared<ofTexture>());
+	tex->setCompression(compression);
 	if (mipmapped) {
 		tex->enableMipmap();
 	}
@@ -75,6 +80,33 @@ shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path,
 	}
 
 	return tex;
+}
+
+shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(shared_ptr<ofPixels> pixels, bool mipmapped, bool arb, ofTexCompression compression)
+{
+	if (pixels == NULL) {
+		ofLogError("ofxAsyncTextureLoader") << "cannot create texture from NULL pixels";
+		return NULL;
+	}
+
+	shared_ptr<ofTexture> tex(make_shared<ofTexture>());
+	tex->setCompression(compression);
+	if (mipmapped) {
+		tex->enableMipmap();
+	}
+	tex->loadData(*pixels);
+	return tex;
+}
+
+shared_ptr<ofPixels> ofxAsyncTextureLoader::loadPixelsSync(const string &path)
+{
+	shared_ptr<ofPixels> pixels(make_shared<ofPixels>());
+	bool ok = ofLoadImage(*pixels, path);
+	if (!ok) {
+		ofLogError("ofxAsyncTextureLoader") << "cannot load pixels from file: "<<path;
+		return NULL;
+	}
+	return pixels;
 }
 
 GLFWwindow* ofxAsyncTextureLoader::getMainContextWindow()
@@ -107,7 +139,16 @@ void ofxAsyncTextureLoader::loaderThreadFunction()
 		loadQueueMutex.unlock();
 
 		for (TextureLoaderTask& task : tasks) {
-			task.tex = loadTextureSync(task.path, task.bMipmapped);
+			if (task.bLoadPixels) {
+				// load with pixels
+				task.pixels = loadPixelsSync(task.path);
+				task.tex = loadTextureSync(task.pixels, task.bMipmapped, task.bLoadAsARB, task.compression);
+			}
+			else {
+				// load without pixels
+				task.tex = loadTextureSync(task.path, task.bMipmapped, task.bLoadAsARB, task.compression);
+			}
+
 			glFinish();
 			if (task.tex == NULL) {
 				ofLogError("ofxAsyncTextureLoader") << "error loading texture: " << task.path;
@@ -129,7 +170,7 @@ void ofxAsyncTextureLoader::callCompleteCallbacks()
 	completeQueueMutex.unlock();
 
 	for (TextureLoaderTask& task : loaded) {
-		task.loadCompleteCallback(task.tex);
+		task.loadCompleteCallback(task.tex, task.pixels);
 	}
 }
 

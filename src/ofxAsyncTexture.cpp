@@ -10,7 +10,7 @@
 
 void ofxAsyncTexture::load(const string &path, bool mipmapped)
 {
-	getTexLoader().loadTextureAsync(path, [this, path] (shared_ptr<ofTexture> t) {
+	getTexLoader().loadTextureAsync(path, mipmapped, false, false, OF_COMPRESS_NONE, [this, path] (shared_ptr<ofTexture> t, shared_ptr<ofPixels> p) {
 		if (t == NULL) {
 			ofLogError("ofxAsyncTexture") << "could not load texture: "<<path;
 			return;
@@ -18,7 +18,7 @@ void ofxAsyncTexture::load(const string &path, bool mipmapped)
 		texturePath = path;
 		tex = t;
 		ofNotifyEvent(eventLoaded, *this, this);
-	}, mipmapped);
+	});
 }
 
 float ofxAsyncTexture::getWidth() const

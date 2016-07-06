@@ -16,8 +16,11 @@ public:
 	~ofxAsyncTextureLoader();
 	ofxAsyncTextureLoader();
 	bool setup();
-	void loadTextureAsync(const string& path, const function<void(shared_ptr<ofTexture>)>& completeCallback = [](shared_ptr<ofTexture> tex) {}, bool mipmapped=false);
-	shared_ptr<ofTexture> loadTextureSync(const string& path, bool mipmapped=false);
+	void loadTextureAsync(const string& path, bool mipmapped=false, bool arb=false, bool loadPixels=false, ofTexCompression compression=OF_COMPRESS_NONE, const function<void(shared_ptr<ofTexture>, shared_ptr<ofPixels>)>& completeCallback = [](shared_ptr<ofTexture> tex, shared_ptr<ofPixels> pixels) {});
+	shared_ptr<ofTexture> loadTextureSync(const string& path, bool mipmapped=false, bool arb=false, ofTexCompression compression=OF_COMPRESS_NONE);
+	shared_ptr<ofTexture> loadTextureSync(shared_ptr<ofPixels>, bool mipmapped=false, bool arb=false, ofTexCompression compression=OF_COMPRESS_NONE);
+	shared_ptr<ofPixels> loadPixelsSync(const string& path);
+
 
 	void callCompleteCallbacks();
 
@@ -29,8 +32,12 @@ private:
 	struct TextureLoaderTask {
 		string path;
 		bool bMipmapped;
+		bool bLoadPixels;
+		bool bLoadAsARB;
+		ofTexCompression compression;
 		shared_ptr<ofTexture> tex;
-		function<void(shared_ptr<ofTexture>)> loadCompleteCallback;
+		shared_ptr<ofPixels> pixels;
+		function<void(shared_ptr<ofTexture>, shared_ptr<ofPixels>)> loadCompleteCallback;
 	};
 	std::vector<struct TextureLoaderTask> loadQueue;
 	std::mutex loadQueueMutex;
