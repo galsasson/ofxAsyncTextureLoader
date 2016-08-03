@@ -47,5 +47,6 @@ private:
 	GLFWwindow* getMainContextWindow();
 	GLFWwindow* create2ndContext(GLFWwindow* main);
 	void loaderThreadFunction();
+	void performLoadTask(TextureLoaderTask& task);
 	void update(ofEventArgs& updateArgs);
 };

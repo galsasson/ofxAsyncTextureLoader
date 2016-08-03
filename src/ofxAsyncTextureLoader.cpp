@@ -8,6 +8,9 @@
 
 #include "ofxAsyncTextureLoader.h"
 
+// uncomment to disable async loading
+//#define OFX_ASYNC_TEXTURE_LOADER_FORCE_SYNC
+
 ofxAsyncTextureLoader::~ofxAsyncTextureLoader()
 {
 	bRunning = false;
@@ -29,6 +32,13 @@ bool ofxAsyncTextureLoader::setup()
 		ofLogWarning("ofxAsyncTextureLoader") << "already initialized";
 		return false;
 	}
+
+#ifdef OFX_ASYNC_TEXTURE_LOADER_FORCE_SYNC
+	ofLogNotice("ofxAsyncTextureLoader") << "OFX_ASYNC_TEXTURE_LOADER_FORCE_SYNC is defined, all texture loads will be blocking";
+	bInitialized = true;
+	bRunning = true;
+	return true;
+#endif
 
 	GLFWwindow* mainWindow = getMainContextWindow();
 	if (mainWindow == NULL) {
@@ -53,6 +63,7 @@ void ofxAsyncTextureLoader::loadTextureAsync(const string& path, bool mipmapped,
 	if (!bInitialized) {
 		ofLogError("ofxAsyncTextureLoader") << "not initialized, call setup() first";
 	}
+
 	TextureLoaderTask task;
 	task.path = path;
 	task.bMipmapped = mipmapped;
@@ -62,9 +73,15 @@ void ofxAsyncTextureLoader::loadTextureAsync(const string& path, bool mipmapped,
 	task.tex = NULL;
 	task.pixels = NULL;
 	task.loadCompleteCallback = completeCallback;
+
+#ifdef OFX_ASYNC_TEXTURE_LOADER_FORCE_SYNC
+	performLoadTask(task);
+	task.loadCompleteCallback(task.tex, task.pixels);
+#else
 	loadQueueMutex.lock();
 	loadQueue.push_back(task);
 	loadQueueMutex.unlock();
+#endif
 }
 
 shared_ptr<ofTexture> ofxAsyncTextureLoader::loadTextureSync(const string& path, bool mipmapped, bool arb, ofTexCompression compression)
@@ -139,26 +156,32 @@ void ofxAsyncTextureLoader::loaderThreadFunction()
 		loadQueueMutex.unlock();
 
 		for (TextureLoaderTask& task : tasks) {
-			if (task.bLoadPixels) {
-				// load with pixels
-				task.pixels = loadPixelsSync(task.path);
-				task.tex = loadTextureSync(task.pixels, task.bMipmapped, task.bLoadAsARB, task.compression);
-			}
-			else {
-				// load without pixels
-				task.tex = loadTextureSync(task.path, task.bMipmapped, task.bLoadAsARB, task.compression);
-			}
+			performLoadTask(task);
 
 			glFinish();
-			if (task.tex == NULL) {
-				ofLogError("ofxAsyncTextureLoader") << "error loading texture: " << task.path;
-			}
 			completeQueueMutex.lock();
 			completeQueue.push_back(task);
 			completeQueueMutex.unlock();
 		}
 
 		ofSleepMillis(1);
+	}
+}
+
+void ofxAsyncTextureLoader::performLoadTask(TextureLoaderTask& task)
+{
+	if (task.bLoadPixels) {
+		// load with pixels
+		task.pixels = loadPixelsSync(task.path);
+		task.tex = loadTextureSync(task.pixels, task.bMipmapped, task.bLoadAsARB, task.compression);
+	}
+	else {
+		// load without pixels
+		task.tex = loadTextureSync(task.path, task.bMipmapped, task.bLoadAsARB, task.compression);
+	}
+
+	if (task.tex == NULL) {
+		ofLogError("ofxAsyncTextureLoader") << "error loading texture: " << task.path;
 	}
 }
 
